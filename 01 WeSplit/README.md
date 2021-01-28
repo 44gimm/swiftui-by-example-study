@@ -55,3 +55,91 @@ Tip: canvas는 갱신이 종종 에러가 발생하는데, 재실행 Option+Cmd+
 
 
 ### form 생성
+Form은 텍스트와 이미지와 같은 정적 제어로 스크롤이 가능한 리스트이지만, text fields, toggle switches, buttons등 과 같이 유저 인터렉티브한 제어로도 가능하다.
+```
+Form {
+      Text("Hello, world!")
+      Text("Hello, world!")
+      Text("Hello, world!")
+      ...
+      Text("Hello, world!")
+}
+```
+Form 안으로 많이 작성할 수 있지만 10개를 넘어가는 순간 SwiftUI에서 제한한다. 이러한 부모안의 자식의 갯수 제한은 SwiftUI의 모든 곳에 적용된다.
+
+이 문제를 해결하기 위해서 Form에서는 Group 혹은 Section을 사용한다.
+```
+Form {
+	Group {
+		Text("Hello, world!")
+	    Text("Hello, world!")	
+	    Text("Hello, world!")
+		...
+		Text("Hello, world!")
+	}
+
+	Group {
+		Text("Hello, world!")
+	    Text("Hello, world!")	
+	    Text("Hello, world!")
+		...
+		Text("Hello, world!")
+	} 
+}
+```
+Group은 화면으로 변화는 없지만, 부모안의 자식의 갯수 제한을 피할 수 있도록 한다.
+```
+Form {
+	Section {
+		Text("Hello, world!")
+	}
+
+	Section {
+		Text("Hello, world!")
+		Text("Hello, world!")
+	}
+}
+```
+Section은 화면에서 아이템들을 시각적으로 분리하는 그룹 역할을 한다.
+
+
+### navigation bar 생성
+```
+var body: some View {
+	NavigationView {
+		Form {
+			Section {
+				Text("Hello World")
+			}
+		}
+		.navigationBarTitle(Text("SwiftUI"))
+	}
+}
+```
+처음 NavigationView를 생성하면 상단에 영역만 차지하는 View가 생성되어 title이 비어있다가, .navigationBarTitle() 이라는 modifier를 form에 붙이면 title이 나타난다. modifier란 일반적인 메소드인데 한가지 차이점은 사용할 때 항상 새로운 인스턴스를 리턴한다. 기본 값이 large title이고 displayMode 파라미터를 추가로 전달하여 inline title로도 사용 가능하다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
