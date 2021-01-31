@@ -11,6 +11,9 @@ https://github.com/twostraws/HackingWithSwift
 음식과 가격을 입력 후 팁과 사람 수를 선택하면 각각 지불해야 할 금액을 알려주는 앱
 
 
+## overview
+
+
 ***
 ### intro
 이 프로젝트는 SwiftUI의 기본을 가르치기 위함. UI design의 기본, 사용자 입력 값과 선택, 이들의 상태를 어떻게 추적하는지 배우게 될 것.
@@ -203,28 +206,152 @@ Picker 뷰에 항목을 만드는데 ForEach가 유용하다. students를 순회
 
 
 
+## implementation
+
+
+***
+### TextField로 사용자의 텍스트 읽기
+가격입력, 가격을 분담할 사람 수, 원하는 팁을 설정하기 위해 ContentView의 프로퍼티로 선언한다.
+```
+@State private var checkAmount = ""
+@State private var numberOfPeople = 2
+@State private var tipPercentage = 2
+```
+checkAmount는 Int혹은 Double이 나아보이지만, SwiftUI에서 textField의 값으로 사용하려면  String이다.
+```
+let tipPercentages = [10, 15, 20, 25, 0]
+```
+사용 가능한 팁배열을 선언하고 tipPercentage가 Picker를 이용하여 선택한 팁의 index이다.
+
+body를 수정한다.
+```
+  var body: some View {
+    Form {
+      Section {
+        TextField("Amount", text: $checkAmount)
+      }
+      
+      Section {
+        Text("$\(checkAmount)")
+      }
+    }
+  }
+```
+전체가 스크롤되는 2개의 Section이 포함된 Form을 생성한다. TextField의 placeholder가 "Amount"이고 checkAmount와 양방향 바인딩 되어있다.
+
+@State property wrapper의 가장 훌륭한 점중 하나는 자동으로 변화를 관찰하는 것인데, 어떤 일이 발생하면 자동으로 body property를 다시 호출하는 것이다. 이는 변경된 상태에 따라 UI를 다시 로드하는 훌륭한 방법이고 SwiftUI가 동작하는 근본적인 기능이다.
+
+이를 확인하기 위해 시뮬레이터로 코드를 실행하면 
+1. TextField는 checkAmount property와 양방향 바인딩 되어있고
+2. checkAmount는 @State로 선언되어, 자동으로 값의 변화를 관찰하고
+3. @State property가 변화가 생기면 SwiftUI는 body property를 다시 호출하고
+4. 업데이트된 checkAmount가 Text로 나타날 것이다.
+
+사용자가 편하게 사용하도록 TextField에 keyboardType()을 추가하자.
+```
+TextField("Amount", text: $checkAmount)
+  .keyboardType(.decimalPad)
+```
+Tip: .numberPad와 .decimalPad는 숫자로된 키보드가 등장하지만 사용자가 숫자 외의 값을 입력하는 것은 막을 수는 없다.
+
+
+***
+### Form에 Picker생성
+Picker는 다양한 목적으로 제공되며, 정확히 어떻게 보이는지는 디바이스와 Picker 컨텍스트에 따라 달라진다.
+```
+  Section {
+    TextField("Amount", text: $checkAmount)
+      .keyboardType(.decimalPad)
+    
+    Picker("Number of people", selection: $numberOfPeople) {
+      ForEach(2 ..< 100) {
+        Text("\($0) people")
+      }
+    }
+  }
+```
+Picker가 Form 밖에 있으면 spinning wheel 옵션이 등장하자만, Form 안에 있으면 양식을 입력받는 형태로 적절하게 SwiftUI에서 자동으로 변경한다. 그리고 Section 안의 Picker 열에 회색 indicator가 있지만 이를 선택하면 아무 동작을 하지 않는다. 새로운 뷰로 Picker의 옵션들을 나타내기 위해 navigationView를 추가해야한다.
+```
+var body: some View {
+  NavigationView {
+  	Form {
+  	  // form 안의 코드들
+  	}
+  	.navigationBarTitle("WeSplit")
+  }
+}
+```
+수정 후 다시 실행하고 Number of people 열을 선택하면 옵션을 선택할 수 있는 새로운 스크린이 슬라이드된다. 4 people이 체크마크 되어있고 다른 것을 탭할 수 있으며 스크린은 자동으로 이전 화면으로 갈것이다.
+
+여기서 보이는 것은 선언적 UI 디자인의 중요성이다. 이것은 우리가 어떻게 해야할지 말하기 보다 무엇을 원하는지 말하는 것을 의미한다. 우리는 몇개의 값이 있는 Picker를 원한다 말했지만, spinning wheel picker인지 또는 새로운 뷰로 옵션을 나타내는 picker인지는 SwiftUI가 결정한다.
+
+Tip: .navigationBarTitle("WeSplit")을 NavigationView 끝에 붙이려고 생각할 수 있지만 Form 끝에 붙여야한다. 이유는 프로그램이 동작하면서 NavigationView는 많은 View를 표시할 수 있기 때문에, NavigationView 내부에 title을 붙여 iOS에서 title 변경을 자유롭게 할 수 있다. (사실 이유가 무슨 이야기인지 이해를 못하겠다.)
+
+
+***
+### 팁 퍼센트를 위한 segmented control 추가
+우린 두번째 Picker를 추가해야 하는데, 이번에는 좀 다르게 segmented control을 원한다. 이는 Picker의 중류 중 하나로 수평 리스트 옵션과 적은 선택지를 표시하기에 유용하다.
+
+두 개의 Section이 있는데 중간에 Section을 하나 추가하자.
+```
+Section {
+  Picker("Tip percentage", selection: $tipPercentage) {
+    ForEach(0 ..< tipPercentages.count) {
+      Text("\(self.tipPercentages[$0])%")
+    }
+  }
+}
+```
+이전의 Picker와 같은 방법으로 Picker를 생성했고, SwiftUI는 리스트에서 하나의 row와 옵션을 선택할 수 있는 새로운 스크린을 만들 것이다. 그러나 segmented control이 더 나아 보이므로 이를 위해 modifier를 Picker에 추가하자
+```
+.pickerStyle(SegmentedPickerStyle())
+```
+우리는 문제를 해결하기 위해 디자인했기 때문에 자동으로 무엇을 의도했는지 전부를 알 수 있지만 실제로는 그렇지 않다. 두번째 섹션이 팁을 고르기 위한 것임을 우린 알지만 Picker가 무엇을 의미하는지 명확하지 않다. 명확하게 수정하자.
+```
+Section(header: Text("How much tip do you want to leave?")) {
+```
+두번째 Section을 위와 같이 수정하자. SwiftUI는 Section에 header와 footer를 추가할 수 있도록 해준다. 코드의 작은 변화로 훨씬 나은 결과를 만들었다.
 
 
 
+***
+### 계산
+지금까지는 checkAmount를 그대로 Text에 나타냈지만, 각각의 사람이 지불해야 하는 금액이 나오도록 수정한다. 쉽게 보이지만 약간의 small wrinkles가 있다.
+- numberOfPage는 사람수와 2만큼 떨어져있다. 3은 5명을 뜻한다.
+- tipPercentage는 tipPercentages 배열의 index를 저장한다.
+- checkAmount는 사용자가 입력한 String이고, 숫자는 유효하나 문자열이 들어가 있을 수 있고 비어 있을 수 있다.
+계산된 property를 생성하자.
+```
+var totalPerPerson: Double {
+  let peopleCount = Double(numberOfPeople + 2)
+  let tipSelection = Double(tipPercentages[tipPercentage])
+  let orderAmount = Double(checkAmount) ?? 0
+
+  let tipAmount = orderAmount / 100 * tipSelection
+  let grandTotal = orderAmount + tipAmount
+  let amountPerPerson = grandTotal / peopleCount
+    
+  return amountPerPerson
+}
+```
+그리고 마지막 Section을 수정하자
+```
+Section {
+  Text("$\(totalPerPerson, specifier: "%.2f")")
+}
+```
+이제 SwiftUI의 view들이 상태의 함수라는 말의 의미를 직접 보기를 희망한다. 상태가 변경되면 자동으로 view들이 자동으로 일치하도록 업데이트된다.
 
 
 
+## Challenges
 
 
+***
+### WeSplit: 마무리
+이번 프로젝트에서 SwiftUI 기본 구조, Form, NavigationView, @State, TextField, Picker, ForEach를 배웠다.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+챌린지
+- 세번째 Section에 “Amount per person” header 추가
+- 사람 수로 나주지 않고 팁을 포함한 전체 가격을 나타내는 Section 추가
+- "Number of people" Picker를 TextField로 수정하고 알맞는 키보드타입 지정하기
