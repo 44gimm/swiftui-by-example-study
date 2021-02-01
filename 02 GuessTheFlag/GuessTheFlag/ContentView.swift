@@ -53,7 +53,7 @@ struct ContentView: View {
     .alert(isPresented: $showingScore) { () -> Alert in
       Alert(title: Text(scoreTitle), message: Text("Wrong! That's the flag of \(contries[selectedNumber])"), dismissButton: .default(Text("Continue")) {
         self.askQuestion()
-        })
+      })
     }
   }
   
