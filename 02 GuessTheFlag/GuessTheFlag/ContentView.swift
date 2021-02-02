@@ -19,7 +19,7 @@ struct ContentView: View {
   var body: some View {
     ZStack {
       LinearGradient(gradient: Gradient(colors: [.blue, .black]), startPoint: .top, endPoint: .bottom).edgesIgnoringSafeArea(.all)
-      
+
       VStack(spacing: 30) {
         VStack {
           Text("Tap the flag of").foregroundColor(.white)
@@ -28,11 +28,11 @@ struct ContentView: View {
             .font(.largeTitle)
             .fontWeight(.black)
         }
-        
+
         ForEach(0 ..< 3) { number in
           Button(action: {
             self.flagTapped(number)
-            
+
           }) {
             Image(self.contries[number])
               .renderingMode(.original)
@@ -41,12 +41,12 @@ struct ContentView: View {
               .shadow(color: .black, radius: 2)
           }
         }
-        
+
         Text("user score: \(userScore)")
           .foregroundColor(.white)
           .font(.largeTitle)
           .fontWeight(.black)
-        
+
         Spacer()
       }
     }
