@@ -43,3 +43,39 @@ view를 struct로 사용하는데 성능도 중요한 이유이지만 더 중요
 Apple의 UIView 문서와 비교하면, UIView에는 대략 200개의 property와 method가 있으며, 이것들을 subclass에서 필요하든 그렇지 않든 모두 전달한다.
 
 Tip: 만약 당신이 view를 class로 만든다면 컴파일되지 않거나 런타임에서 크래시가 발생한다. 믿고 struct를 사용하자.
+
+
+### 메인 SwiftUI view 뒤에 있는 것은 무엇인가?
+```swift
+struct ContentView: View  {
+  var body: some View {
+    Text("Hello World")
+  }
+}
+```
+SwiftUI를 처음 시작하면 위와 같은 코드가 생성되고, text view의 background color를 주면 스크린 전체를 채울 것이라 생각한다. 하지만 작은 text view에만 색깔이 채워지고 나머지는 배경은 흰색이다. 이는 사람들을 혼란스럽게 하고 view 뒤에 있는 것을 색으로 채우려면 어떻게 해야하는가?
+
+SwiftUI 개발자들에게 명확하게 말해면 view 뒤에는 아무것도 없다. 
+
+최소한 UIHostingController라는 content view 뒤에 무엇인가 있다. 이는 UIKit과 SwiftUI의 브릿지이다. 하지만 이것을 수정하려 한다면 Apple의 다른 플랫폼에서 코드가 더이상 동작하지 않으며, iOS에서는 동작이 완전히 멈출 것이다.
+
+위에서 본 문제의 정답은 text view가 더 많은 공간을 차지하게 하는 것이다.
+```swift
+Text("Hello World")
+  .frame(maxWidth: .infinity, maxHeight: .infinity)
+  .background(Color.red)
+  .edgesIgnoringSafeArea(.all)
+```
+
+
+### modifier 순서가 왜 중요한가?
+우리가 view에 modifier를 적용할 때 실제로는 기존의 view를 수정하는 것이 아니라 새로운 view를 만든 것이다. view는 우리가 제공한 property만 유지한다.
+
+```swift
+Button("Hello World") {
+      
+}
+.background(Color.red)
+.frame(width: 200, height: 200)
+```
+이 코드를 실행하면 200x200의 빨간색 버튼이 생길 것이라 생각할 수 있지만 실제로는 빨간색 Hello World와 그 주변이 비어있는 200x200 사각형의 버튼 표시된다.
