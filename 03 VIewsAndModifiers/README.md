@@ -73,9 +73,46 @@ Text("Hello World")
 
 ```swift
 Button("Hello World") {
-      
+  print(type(of: self.body))
 }
 .background(Color.red)
 .frame(width: 200, height: 200)
 ```
-이 코드를 실행하면 200x200의 빨간색 버튼이 생길 것이라 생각할 수 있지만 실제로는 빨간색 Hello World와 그 주변이 비어있는 200x200 사각형의 버튼 표시된다.
+이 코드를 실행하면 200x200의 빨간색 버튼이 생길 것이라 생각할 수 있지만 실제로는 빨간색 Hello World와 그 주변이 비어있는 200x200 사각형의 버튼 표시된다. modifier가 동작하는 방법을 생각해보면 이해할 수 있는데 modifier는 view에 속성을 설정하는 대신 각각 새로운 struct를 생성하는 것이다.
+
+Swift의 type(of:) 메소드는 특정 값의 정확한 타입을 출력한다. 그리고 위의 버튼은 이렇게 출력한다.
+```
+ModifiedContent<ModifiedContent<Button<Text>, _BackgroundModifier<Color>>, _FrameLayout>
+```
+- view를 수정할 때마다 SwiftUI는 generic을 사용하여 modifier를 적용한다.
+- 다수의 modifier를 적용할 때 modifier는 쌓여간다.
+
+어떤 타입인지 보기 위해서 안쪽부터 밖으로 읽어 나간다.
+- 가장 안쪽 타입은 ModifiedContent<Button<Text>, _BackgroundModifier<Color>> 으로 버튼은 text를 가지며 background color가 적용됐다.
+- 그 밖으로 ModifiedContent<..., _FrameLayout>으로, 첫번째 view를 가져오고 더 큰 frame을 적용했다.
+
+여기서 볼 수 있듯이 view를 직접 수정하는 대신 변환할 각각의 view를 가져와 실제 변경사항을 적용하여 ModifiedContent를 쌓아가는 방식이다. **이것은 modifier의 순서가 중요함을 의미한다.** 우리의 코드에서 background를 frame 다음에 오도록 수정하면 기대하는 결과를 얻을 수 있다.
+```swift
+Button("Hello World") {
+  print(type(of: self.body))
+}
+.frame(width: 200, height: 200)
+.background(Color.red)
+```
+modifier를 사용하는데 중요한 부작용은 같은 효과를 여러번 적용할 수 있다는 것이다. 각각은 이전에 있었던게 무엇이든 단순히 추가만 한다. 예를들어
+```swift
+Text("Hello World")
+  .padding()
+  .background(Color.red)
+  .padding()
+  .background(Color.blue)
+  .padding()
+  .background(Color.green)
+  .padding()
+  .background(Color.yellow)
+```
+.padding()을 지워보면 알 수 있다.
+
+
+### SwiftUI는 왜 "some View" 타입을 사용하는가?
+SwiftUI는 당신이 매번 작성하는 some View에서 볼 수 있듯이 Swift의 강력한 기능 "opaque return types"에 의지한다.
