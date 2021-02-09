@@ -115,4 +115,11 @@ Text("Hello World")
 
 
 ### SwiftUI는 왜 "some View" 타입을 사용하는가?
-SwiftUI는 당신이 매번 작성하는 some View에서 볼 수 있듯이 Swift의 강력한 기능 "opaque return types"에 의지한다.
+SwiftUI는 당신이 매번 작성하는 some View에서 볼 수 있듯이 Swift의 강력한 기능 "opaque return types"에 의지한다. 
+
+some View의 리턴은 그냥 View를 리턴 하는 것과 중요한 두가지 차이점이 있다.
+1. 항상 같은 타입의 View를 리턴 해야한다.
+2. 원래 타입이 무엇인지 모르지만 컴파일은 되어야한다.
+
+첫번째 차이점은 성능을 위해 중요하다. 두번째 차이점은 SwiftUI가 ModifiedContent를 사용하기 때문에 중요하다.(이전장에서 봤던것)
+
