@@ -121,5 +121,114 @@ some View의 리턴은 그냥 View를 리턴 하는 것과 중요한 두가지 �
 1. 항상 같은 타입의 View를 리턴 해야한다.
 2. 원래 타입이 무엇인지 모르지만 컴파일은 되어야한다.
 
-첫번째 차이점은 성능을 위해 중요하다. 두번째 차이점은 SwiftUI가 ModifiedContent를 사용하기 때문에 중요하다.(이전장에서 봤던것)
+첫번째 차이점은 성능을 위해 중요하다. 두번째 차이점은 SwiftUI가 ModifiedContent를 사용하기 때문에 중요하다(이전장에서 봤던것). View 프로토콜은 associatedType이 포함되어 있고, 이는 View자체로는 어떤 의미도 없다는 Swift의 방식을 말한다. 우린 어떤 종류의 타입인지 정확하게 말해야한다.
+```swift
+struct ContentView: View {
+  var body: View {
+    Text("Hello World")
+  }
+}
+```
+그래서 위처럼 작성하는 것은 허용되지 않고
+```swift
+struct ContentView: View {
+  var body: Text {
+    Text("Hello World")
+  }
+}
+```
+이렇게 작성하는 것이 완벽하게 합법적이다.
 
+View를 리턴하는 것은 의미가 없다. Swift는 View 내부에 어떤것이 있는지 알고싶어 하기 때문이다. Text를 리턴하는 것은 View가 무엇인지 Swift가 알 수 있기 때문에 괜찮다. 그럼 다음 코드를 보자.
+```swift
+Button("Hello World") {
+  print(type(of: self.body))
+}
+.frame(width: 200, height: 200)
+.background(Color.red)
+```
+우린 body property에서 하나의 타입을 리턴하길 원하는데 어떻게 작성해야 하는가? 정확한 방법으로는 ModifiedContent generics의 조합으로 작성하길 시도하겠지만 이는 매우 고통스럽다. 
+
+some View는 우리에게 "이것은 Button 혹은 Text처림 View의 특정한 하나의 타입을 리턴할 것이지만, 무엇인지는 말하고싶지 않다." 라고 말하는 것이다. 그래서 길고 정확하게 작성할 필요가 없고, 리턴하는 조건에도 만족한다.
+
+#### Want to go further?
+이제 VStack같은 것은 SwiftUI에서 어떻게 다룰 수 있는지 궁금할 수 있다. 만약 VStack안에 두개의 Text가 있다고 생각하면, SwiftUI는 두개의 view를 가질 수 있는 TupleView라는 특정한 타입을 생성한다. 그래서 VStack은 두개의 Text를 포함하는 TupleView라는 view의 종류로 구성되고, 만약 더 많은 Text를 가지면 TupleView가 그만큼 포함한다. 
+```swift
+TupleView<(C0, C1, C2, C3, C4, C5, C6, C7, C8, C9)>
+```
+이런 식으로 쌓여하기 때문에 SwiftUI는 부모안으로 10개보다 많은 view를 가질 수 없도록 되어있다.
+
+
+## Advanced Usage
+
+
+### Conditional modifiers
+특정 조건에서만 작동하는 modifier는 일반적이며, SwiftUI에서 가장 쉬운 방법은 삼항 연산자이다.
+```swift
+struct ContentView: Viewe {
+  @State private var useRedText = false
+
+  var body: some View {
+    Button("Hello World") {
+      self.useRedText.toggle()
+    }
+    .foregroundColor(useRedText ? .red : .blue)
+  }
+}
+```
+useRedText가 true이면 빨강, false이면 파랑이 되는데 이는 SwiftUI가 @State 프로퍼티의 변화를 지켜보며 body 프로퍼티를 재호출 하기 때문이다.
+
+조건문을 사용해서 상태에 따라 다르게 생긴 View를 리턴할 수도 있다. 그러나 이는 적은 상황에서만 사용 가능하고 아래와 같은 예제는 허용되지 않는다.
+```swift
+var body: some View {
+  if self.useRedText {
+    return Text("Hello World")
+  } else {
+    return Text("Hello World")
+             .background(Color.red)
+  }
+}
+```
+some View를 리턴하면서 Text(...) 또는 Text(...).background(Color.red)를 리턴하는 것은 허용하지 않는다.
+
+
+### Environment modifiers
+많은 modifier들은 container에 적용이 가능하다. 예를들어 4개의 Text가 있고 모두 같은 modifier를 적용하고 싶다면, VStack에 적용한다.
+```swift
+VStack {
+  Text("Gryffindor")
+  Text("Hufflepuff")
+  Text("Ravenclaw")
+  Text("Slytherin")
+}
+.font(.title)
+```
+이는 environment modifier라 불리며, 일반 modifier와 다르다.
+
+코드의 관점에서는 일반적인 modifier의 방법과 동일하게 사용되었지만, 만약 Text 중 같은 modifier를 사용하면 Text에 우선순위가 있다는 점에서 다르다.
+```swift
+VStack {
+  Text("Gryffindor")
+    .font(.largeTitle)
+  Text("Hufflepuff")
+  Text("Ravenclaw")
+  Text("Slytherin")
+}
+.font(.title)
+```
+여기서 font()가 environment modifier이다. 이는 Text("Gryffindor")가 커스텀으로 재정의할 수 있다는 의미이다.
+
+그러나 blur 효과는 하나의 Text에서 불가능하다.
+```swift
+VStack {
+  Text("Gryffindor")
+    .blur(radius: 0)
+  Text("Hufflepuff")
+  Text("Ravenclaw")
+  Text("Slytherin")
+}
+.blur(radius: 5)
+```
+blur()는 일반적인 modifier이므로 같은 방법으로 동작하지 않는다. 모든 Text들은 VStack에 적용된 modifier가 적용된다.
+
+environment modifier와 일반적인 modifier를 미리 구별하는 것은 불가능하며 경험이 필요하다. 하나의 modifier로 모든 곳에 적용하는 것이 각각의 모든 곳에 modifier를 붙여넣기 하는 방법보다 낫다.
