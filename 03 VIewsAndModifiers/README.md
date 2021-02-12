@@ -232,3 +232,157 @@ VStack {
 blur()는 일반적인 modifier이므로 같은 방법으로 동작하지 않는다. 모든 Text들은 VStack에 적용된 modifier가 적용된다.
 
 environment modifier와 일반적인 modifier를 미리 구별하는 것은 불가능하며 경험이 필요하다. 하나의 modifier로 모든 곳에 적용하는 것이 각각의 모든 곳에 modifier를 붙여넣기 하는 방법보다 낫다.
+
+
+### Views as properties
+SwiftUI에서 복잡한 view 계층들을 쉽게 만드는 방법은 여러가지들이 있고, 하나는 당신의 view에 property로 view를 선언하고 레이아웃 안으로 사용하는 것이다.
+```swift
+struct ContentView: View {
+  let motto1 = Text("Draco dormiens")
+  let motto2 = Text("nunquam titillandus")
+
+  var body: some View {
+    VStack {
+      motto1
+      motto2
+    }
+  }
+}
+```
+modifier도 property에 직접 적용할수 있다.
+```swift
+VStack {
+  motto1
+    .foreground(.red)
+  motto2
+    .foreground(.blue)
+}
+```
+
+
+### View composition
+SwiftUI는 성능에 영향없이 복잡한 view를 작은 view로 나눌 수 있게 한다. 
+```swift
+struct ContentView: View {
+  var body: some View {
+    VStack(spacing: 10) {
+      Text("First")
+        .font(.largeTitle)
+        .padding()
+        .foregroundColor(.white)
+        .background(Color.blue)
+        .clipShape(Capsule())
+
+      Text("Second")
+        .font(.largeTitle)
+        .padding()
+        .foregroundColor(.white)
+        .background(Color.blue)
+        .clipShape(Capsule())
+    }
+  }
+}
+```
+두개의 Text가 문구를 제외하고 동일하기 때문에 이를 새로운 커스텀view로 만들 수 있다.
+```swift
+struct CapsuleText: View {
+  var text: String
+  var body: some View {
+    Text(text)
+      .font(.largeTitle)
+      .padding()
+      .forgroundColor(.white)
+      .background(Color.blue)
+      .clipShape(Capsule())
+  }
+}
+```
+이렇게 만든 CapsuleText를 기존 ContentView에서 사용할 수 있다.
+```swift
+struct ContentView: View {
+  var body: some View {
+    VStack(spacing: 10) {
+      CapsuleText(text: "First")
+      CapsuleText(text: "Second")
+    }
+  }
+}
+```
+물론 여기에 modifier도 적용할 수 있다.
+
+
+### Custom modifiers
+SwiftUI에는 많은 빌트인된 modifier들이 있고, 커스텀하게 modifier를 생성도 가능하다. 예를들어 앱 전체에 특정한 스타일의 title들이 필요하면 우린 커스텀 ViewModeifier를 따르는 struct 생성할 필요가 있다.
+```swift
+struct Title: ViewModifier {
+  func body(content: Content) -> some View {
+    content
+      .font(.largeTitle)
+      .foregroundColor(.white)
+      .padding()
+      .background(Color.blue)
+      .clipShape(RoundedRectangle(cornerRadius: 10))
+  }
+}
+```
+우린 이제 modifier()라는 modifier를 사용할 수 있다.
+```swift
+Text("Hello World")
+  .modifier(Title())
+```
+View의 extension으로 더 쉽게 사용하는 방법도 있다.
+```swift
+extension View {
+  func titleStyle() -> some View {
+    self.modifier(Title())
+  }
+}
+
+// 이제 이렇게 사용할 수 있다.
+Text("Hello World")
+  .titleStyle()
+```
+커스텀 modifier는 단지 존재하는 modifier들을 적용하는 것 보다도 더 많은 일을 할 수 있다. 새로운 view 구조를 만들 수도 있다.
+```swift
+struct Watermark: ViewModifier {
+  var text: String
+  func body(content: Content) -> some View {
+    ZStack(alignment: .bottomTrailing) {
+      content
+      Text(text)
+        .font(.caption)
+        .foregroundColor(.white)
+        .padding(5)
+        .background(Color.black)
+    }
+  }
+}
+
+extension View {
+  func watermarked(with text: String) -> some View {
+    self.modifier(Watermark(text: text))
+  }
+}
+
+// 이제 이렇게 사용할 수 있다.
+Color.blue
+  .frame(width: 300, height: 300)
+  .watermarked(with: "Hacking with Swift")
+```
+
+
+### Custom containers
+자주 사용하는건 아니지만, SwiftUI 앱에서 완벽하게 custom container를 성생할 수 있다. 
+
+이를 위해 그리드 안으로 여러개의 view를 생성할 수 있는 GridStack라는 새로운 타입을 만들 것이다. GridStack 이라는 이름의 View 프로토콜을 따르는 새로운 struct를 만들고 row와 column을 가진다.
+```swift
+struct GridStack<Content: View>: View {
+  let rows: Int
+  let columns: Int
+  let content: (Int, Int) -> Content
+  
+  var body: some View {
+    // more to come
+  }
+}
+```
