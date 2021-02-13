@@ -15,14 +15,14 @@ https://github.com/twostraws/HackingWithSwift
 
 
 ### intro
-이번 프로젝트는 기술 프로젝트이다. SwiftUI의 기능들을 왜 그러한 방법으로 어떻게 동작하는지 살며보며 페이스를 조절한다. 이번 프로젝트는 view와 view modifier들을 자세히 살펴볼 것이며 SwiftUI는 왜 view를 위해 struct를 사용하는지, some View는 왜 많이 사용하는지, modifier는 어ㄸ허게 동작하는지에 대한 물음에 답을 한다.
+이번 프로젝트는 기술 프로젝트이다. SwiftUI의 기능들을 왜 그러한 방법으로 어떻게 동작하는지 살며보며 페이스를 조절한다. 이번 프로젝트는 view와 view modifier들을 자세히 살펴볼 것이며 SwiftUI는 왜 view를 위해 struct를 사용하는지, some View는 왜 많이 사용하는지, modifier는 어떻게 동작하는지에 대한 물음에 답을 한다.
 
 
 ## Concepts
 
 
 ### SwiftUI는 view를 위해 왜 struct를 사용하는가?
-UIKit 또는 AppKit으로 작업을한 적이 있다면 당신은 struct보단 class로 이루어져 있는 것을 알고있다. SwiftUI에서는 그렇지 않고 struct를 사용해야하는데 거기에는 몇가지 이유가 있다.
+UIKit 또는 AppKit으로 작업을 한적이 있다면 당신은 struct보단 class로 이루어져 있는 것을 알고있다. SwiftUI에서는 그렇지 않고 struct를 사용해야하는데 거기에는 몇가지 이유가 있다.
 
 첫 번째는 성능이다. struct가 class보다 더 간단하고 더 빠르다. 많은 사람들의 이것이 SwiftUI가 struct를 사용하는 주요 이유라 생각하지만, 이는 큰 것 중 일부일 뿐이다.
 
@@ -30,7 +30,7 @@ UIKit 에서는 모든 view들이 매우 많은 property들과 method가 있는 
 
 이것이 때로는 문제가 되지 않지만, 특정한 예로 UIStackView가 있는데, 이는 layout을 쉽게 구성하기 위해 non-rendering view 타입으로 디자인되었다. 그러나 이것은 상속 덕분에 backgroundColor를 가질 수 있지 실제로는 backgroundColor가 존재하지 않는다.
 
-SwiftUI에서는 모든 view들이 사소한 struct이고 거의 만드는데 자유롭다. 이것에 대해 생각해보면, 만약 당신이 하나의 정수만이 있는 struct를 만든다면, 이 struct의 전체 사이즈는 하나의 정수 사이즈이다. 부모, 그 조상, 조상의 조상으로 부터 상속된 여분의 값 없이 struct는 정확하게 보이는 것만 가지고 나머지는 없다.
+SwiftUI에서는 모든 view들이 사소한 struct이고 만드는데 자유롭다. 이것에 대해 생각해보면, 만약 당신이 하나의 정수만이 있는 struct를 만든다면, 이 struct의 전체 사이즈는 하나의 정수 사이즈이다. 부모, 그 조상, 조상의 조상으로 부터 상속된 여분의 값 없이 struct는 정확하게 보이는 것만 가지고 나머지는 없다.
 
 현대의 아이폰의 힘 덕분에, 천개의 정수 혹은 십만개의 정수를 만드는것에 대해 고려하지 않아도 되는 것처럼 SwiftUI에서도 천개의 view와 십만개의 view를 만들어도 걱정할 필요가 없다.
 
@@ -38,7 +38,7 @@ view를 struct로 사용하는데 성능도 중요한 이유이지만 더 중요
 
 변하지 않는 view들을 생성함으로써, SwiftUI는 보다 기능적인 디자인 설계 접근 방식으로 전환하도록 권장한다. 우리의 view들은 제어할 수 없게 되는 지능적인 것이 아니라, 데이터를 UI로 변환하는 단순하고 비활성 적인 것이 된다.
 
-당신이 view가 될 수 있는 것들의 종류를 볼 때 실제로 동작하는 것을 볼 수 있다. 우린 이미 Color.rec와 LinearGradient를 적은 데이터를 가진 사소한 타입의 view로서 사용했다. 사실 당신은 Color.red를 view로서 사용하는것 보다 더 간단할 수 없다. 이것은 "나의 공간을 빨간색으로 채워라" 외에는 정보다 없다.
+당신이 view가 될 수 있는 것들의 종류를 볼 때 실제로 동작하는 것을 볼 수 있다. 우린 이미 Color.red와 LinearGradient를 적은 데이터를 가진 사소한 타입의 view로서 사용했다. 사실 당신은 Color.red를 view로서 사용하는것 보다 더 간단할 수 없다. 이것은 "나의 공간을 빨간색으로 채워라" 외에는 정보다 없다.
 
 Apple의 UIView 문서와 비교하면, UIView에는 대략 200개의 property와 method가 있으며, 이것들을 subclass에서 필요하든 그렇지 않든 모두 전달한다.
 
@@ -149,7 +149,7 @@ Button("Hello World") {
 ```
 우린 body property에서 하나의 타입을 리턴하길 원하는데 어떻게 작성해야 하는가? 정확한 방법으로는 ModifiedContent generics의 조합으로 작성하길 시도하겠지만 이는 매우 고통스럽다. 
 
-some View는 우리에게 "이것은 Button 혹은 Text처림 View의 특정한 하나의 타입을 리턴할 것이지만, 무엇인지는 말하고싶지 않다." 라고 말하는 것이다. 그래서 길고 정확하게 작성할 필요가 없고, 리턴하는 조건에도 만족한다.
+some View는 우리에게 "이것은 Button 혹은 Text처럼 View의 특정한 하나의 타입을 리턴할 것이지만, 무엇인지는 말하고싶지 않다." 라고 말하는 것이다. 그래서 길고 정확하게 작성할 필요가 없고, 리턴하는 조건에도 만족한다.
 
 #### Want to go further?
 이제 VStack같은 것은 SwiftUI에서 어떻게 다룰 수 있는지 궁금할 수 있다. 만약 VStack안에 두개의 Text가 있다고 생각하면, SwiftUI는 두개의 view를 가질 수 있는 TupleView라는 특정한 타입을 생성한다. 그래서 VStack은 두개의 Text를 포함하는 TupleView라는 view의 종류로 구성되고, 만약 더 많은 Text를 가지면 TupleView가 그만큼 포함한다. 
@@ -283,7 +283,7 @@ struct ContentView: View {
   }
 }
 ```
-두개의 Text가 문구를 제외하고 동일하기 때문에 이를 새로운 커스텀view로 만들 수 있다.
+두개의 Text가 문구를 제외하고 동일하기 때문에 이를 새로운 커스텀 view로 만들 수 있다.
 ```swift
 struct CapsuleText: View {
   var text: String
@@ -386,3 +386,66 @@ struct GridStack<Content: View>: View {
   }
 }
 ```
+첫째줄에 제네릭과 View 프로토콜을 따른다는 선언이 되어있다. **let content** 라인은 클로저를 선언했다. 다음 body는
+```swift
+var body: some View {
+  VStack {
+    ForEach(0..<rows, id: \.self) { row in 
+      HStack {
+        ForEach(0..<self.columns, id: \.self) { column in 
+          self.content(row, column)
+        }
+      }
+    }
+  }
+}
+``` 
+range를 반복할 때 SwiftUI는 range의 값이 시간에 따라 변경되지 않는 상황에서만 직접적으로 range를 사용할 수 있다. 여기서 rows와 columns는 변경될 수 있는 값이므로 ForEach의 두번째 파라미터로 **\\.self**를 추가해서 SwiftUI가 반복문안에서 각각의 view를 식별할 수 있게 해야한다. 자세한 내용은 5번째 프로젝트에서 본다.
+
+이제 custom container를 사용할 수 있다.
+```swift
+struct ContentView: View {
+  var body: some View {
+    GridStack(rows: 4, columns:4) { row, col in 
+      HStack {
+        Image(systemName: "\(row * 4 + col).circle")
+        Text("R\(row) C\(col)")
+      }
+    }
+  }
+}
+```
+GridStack은 View 프로토콜을 따르는 것으로 구성되면 셀 컨텐츠로 사용할 수 있다.
+
+#### Want to go further?
+더 유연성있게 SwiftUI의 기능 중 하나인 ViewBuilder를 사용할 수 있다. 이는 여러개의 view를 보내고 암묵적으로 stack을 구성한다. 이를 위해 GridStack에 생성자를 추가해야하며, content 클로저에 SwiftUI의 ViewBuilder 시스템을 사용하는 마커를 표시할 수 있다.
+```swift
+init(
+  rows: Int, 
+  columns: Int, 
+  @ViewBuilder content: @escaping (Int, Int) -> Content) {
+    self.rows = rows
+    self.columns = columns
+    self.content = content
+}
+```
+이렇게하면 SwiftUI는 자동으로 암묵적인 horizontal stack을 셀 클로저 안에서 생성할 것이다.
+```swift
+GridStack(rows: 4, columns:4) { row, col in 
+  Image(systemName: "\(row * 4 + col).circle")
+  Text("R\(row) C\(col)")
+}
+```
+두가지 옵션 중 선호하는 것으로 작업하면 된다.
+
+
+## Challenges
+
+
+### Views and modifiers: Wrap up
+이 기술 프로젝트는 SwiftUI의 특정한 주제에 대하여 더 깊이 있게 알아보도록 구성됐다. SwiftUI 앱에서는 view와 modifier가 기본적인 블록들이고, View composition은 보다 큰 UI를 구성할 때 더 작고 재사용 가능한 view를 만들 수 있도록 해준다.
+
+여기에 진행상황을 완전히 이해해야 우리의 앱을 확장할 수 있는 세가지 방법이 있다.
+1. custom ViewModifier와 View extension을 만들어서 크고 파란색 폰트의 눈에띄는 title을 만들어라.
+2. 첫번째 프로젝트(01 WeSplit)로 돌아가서 conditional modifier를 사용하여 0%의 팁일 경우 total amount text를 빨간색으로 변경하라.
+3. 두번째 프로젝트(02 GuessTheFlag)로 돌아가서 우리가 가지고 있는 특정 modifier set을 사용하여 하나의 플래그 이미지를 만드는 FlagImage()를 만들어라.
