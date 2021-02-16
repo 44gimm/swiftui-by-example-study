@@ -91,3 +91,47 @@ DatePicker(
   in: Date()...)
 ```
 이렇게 작성하면 과거는 선택할 수 없고 현재와 미래만 선택하도록 제한할 수 있다.
+
+
+### date로 작업하기
+사용자가 날짜를 입력하는 것은 쉽지만 나중에는 모호해진다. date작업은 어렵다. 에제를 보자.
+```swift
+let now = Date()
+let tomorrow = Date().addingTimeInterval(86400)
+let range = now ... tomorrow
+```
+range는 지금 현재부터 똑같은 시간의 다음날까지이다. 간단해 보이지만 항상 모든 날이 86400초가 아니다. 예를 들어 윤초가 있다. 
+
+날짜의 계산과 포멧팅을 위해 Apple의 프레임워크에 의존해야 한다. 이번 프로젝트에서 우리는 세가지 방법으로 Date를 사용할 것이다.
+1. 합리적인 기본 잠에서 깨는 시간 선택
+2. 그들이 원하는 잠에서 깨는 시, 분 보기
+3. 제안하는 잠자는 시간 양식에 맞게 보여주기
+
+윤초와 같은 어려운 작업은 직접 손으로 작성할 수도 있지만 iOS에 맡겨 더 적에 일하고 더 정확한 결과를 얻도록 하자.
+
+첫번째는 Swift가 제공하는 Date는 년, 월, 일, 시, 분, 초, 타임존 등 많은 것을 제공하지만 우리가 원하는 것은 "요일과 상관없이 오전 8시 일어나는 시간"이다. Swift는 DateComponents라는 것을 제공하고, 이는 특정 타입에 맞게 쓰거나 읽기 가능하게 한다. 만약 오전 8시를 표현하길 원한다면 아래와 같이 작성할 수 있다.
+```swift
+var components = DateComponents()
+components.hour = 8
+components.minute = 0
+let date = Calendar.current.date(from: components) ?? Date()
+```
+
+두번째는 그들이 원하는 시간을 어떻게 읽을 수 있는가이다. DatePicker는 Date와 bind 되어 있고, 우린 시와 분 요소들을 가져오면 된다.
+```swift
+let components = Calendar.current.dateComponents([.hour, .minute], from: someDate)
+let hour = components.hour ?? 0
+let minute = components.minute ?? 0
+```
+
+세번째는 어떻게 날짜와 시간을 양식에 맞추는가이다. DateFormatter를 이용하여 작성한다.
+```swift
+let formatter = DateFormatter()
+formatter.timeStyle = .short
+let dateString = formatter.string(from: Date())
+```
+.dateStyle을 사용하여 날짜 값을 얻을 수도 있다. 그리고 완전히 커스텀하게 dateFormat을 사용할 수도 있다.
+
+
+### Create ML로 모델 훈련하기
+[영상] [https://www.youtube.com/watch?v=EDYl-aO1xAk]
