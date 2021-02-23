@@ -150,4 +150,13 @@ Create ML을 열면 프로젝트를 생성할지 이전의 것을 가져올지 �
 
 Create ML에서 Data 입력 Training Data라는 제목의 아래에서 Choose를 선택한다. 그 다음 파일선택을 눌러 BetterRest.csv를 선택한다.
 
-**중요**: 이 csv파일은 프로젝트를 위한 샘플데이터이므로 실제 작업에는 사용하지마세요.
+**중요**: 이 csv 파일은 프로젝트를 위한 샘플데이터이므로 실제 작업에는 사용하지 마세요.
+
+다음은 컴퓨터가 예측하기위해 학습하기를 원하는 값의 대상과 검사할 값들의 대상을 정하는 것이다.
+
+여기서는 컴퓨터가 실제로 필요한 잠의 양을 예측하기 위해 학습할 대상을 정하기위해 Target으로 "actualSleep"을 선택한다. 그리고 Select Features 버튼을 누르고(현재는 Choose Features로 버튼 타이틀이 변경된 듯 하다) 세가지 옵션 모두를 선택한다. 
+
+Select Features 버튼 아래에 Alogirithm 드롭다운 메뉴에서 5가지(Automatic, Random Forest, Boosted Tree, Decision Tree, Linear Regression)이 있는데, 각자 다른 방법으로 데이터를 분석한다. 
+
+유용하게 자동으로 최적의 알고리즘을 선택하는 Automatic 옵션이 있다. 이는 항상 정확하지는 않지만 이번 프로젝트에서는 충분하다.
+
