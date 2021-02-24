@@ -158,5 +158,57 @@ Create ML에서 Data 입력 Training Data라는 제목의 아래에서 Choose를
 
 Select Features 버튼 아래에 Alogirithm 드롭다운 메뉴에서 5가지(Automatic, Random Forest, Boosted Tree, Decision Tree, Linear Regression)이 있는데, 각자 다른 방법으로 데이터를 분석한다. 
 
-유용하게 자동으로 최적의 알고리즘을 선택하는 Automatic 옵션이 있다. 이는 항상 정확하지는 않지만 이번 프로젝트에서는 충분하다.
+유용하게도 자동으로 최적의 알고리즘을 선택하는 Automatic 옵션이 있다. 이는 항상 정확하지는 않지만 이번 프로젝트에서는 충분하다.
+
+준비가 됐으면 window title bar의 Train 버튼을 클릭하자. 몇 초 뒤 결과를 볼 수 있다. 우리가 신경 쓸 값은 Root Mean Squared Error 라는 값으로, 약 180정도의 값입니다. 이는 평균적으로 모델이 정확한 수면 시간을 예측하기에 180초 정도의 에러가 있음을 뜻한다.
+
+더 나아가 만약 오른쪽 끝의 "Output" 메뉴를 보면 파일 크기가 438bytes 인 것을 볼 수 있다. Create ML은 180KB의 데이터를 438bytes로 압축했다.
+
+438bytes는 매우 작지만 거의 모든 bytes가 메타데이터라는 점을 더해야 가치있다.
+
+3가지 변수에 기초하여 요구되는 수면 시간을 예측할 실제 하드 데이터가 차지하는 공간은 100bytes 보다 적다. 이것은 Create ML이 값이 무엇인지가 아니라 그들의 관계에만 신경을 쓰기 때문이다. 여러가지 조합으로 가장 가까운 값을 생성하는지 알게 되면 베스트 알고리즘을 단순히 저장한다.
+
+모델이 훈련되었으므로 코드에서 사용할 수 있도록 하겠다.
+
+Tip: 다양한 알고리즘으로 훈련을 다시 시도하려면 오른쪽 하단의 "Make A Copy"를 클릭하자.
+
+
+## Implementation
+
+
+### 간단한 레이아웃 생성
+이 앱은 사용자로부터 DatePicker와 두개의 Stepper로 사용자가 원하는 기상시간, 원하는 수면시간, 마시는 커피의 양을 입력 받을 것이다.
+```swift
+@State private var wakeUp = Date()
+@State private var sleepAmount = 8.0
+@State private vvar coffeeAmount = 1
+```
+
+body의 안에는 VStack과 NavigationView로 깜싸고 세개의 컴포넌트를 배치할 것이다.
+```swift
+NavigationView {
+  VStack {
+    Text("When do you want to wake up?")
+      .font(.headline)
+
+    DatePicker(
+      "Please enter a time", 
+      selection: $wakeUp, 
+      displayedComponents: ,hourAndMinute)
+      .labelsHidden()
+
+    // more to come
+  }
+}
+```
+
+다음은 사용자가 원하는 수면시간을 대략적으로 선택할 Stepper를 추가한다. range는 4...12 이고, 0.25단위로 한다. 그러나 "8.000000"이 아닌 "8"로 볼 수 있도록 %g string interpolation specifier 를 추가하자. // more to come 부분에 코드를 입력한다.
+```swift
+Text("Desired amount of sleep")
+  .font(.headline)
+
+Stepper(value: $sleepAmount, in: 4...12, step: 0.25) {
+  Text("\(sleepAmount, specifier: "%g") hours")
+}
+````
 

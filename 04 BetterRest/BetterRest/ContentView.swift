@@ -24,7 +24,10 @@ struct ContentView: View {
           Text("When do you want to wake up?")
             .font(.headline)
           
-          DatePicker("Please enter a time", selection: $wakeUp, displayedComponents: .hourAndMinute)
+          DatePicker(
+            "Please enter a time",
+            selection: $wakeUp,
+            displayedComponents: .hourAndMinute)
             .labelsHidden()
             .datePickerStyle(WheelDatePickerStyle())
         }
