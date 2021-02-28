@@ -212,3 +212,38 @@ Stepper(value: $sleepAmount, in: 4...12, step: 0.25) {
 }
 ````
 
+마지막으로 사용자가 마시는 커피의 양을 다루기위해 하나의 stepper와 label을 추가하자. 아래의 코드를 VStack 안에 추가하자.
+```swift
+Text("Daily coffee intake")
+  .font(.headline)
+
+Stepper(value: $coffeeAmount, in: 1...20) {
+  if coffeeAmount == 1 {
+    Text("1 cup")
+  } else {
+    Text("\(coffeeAmount) cups")
+  }
+}
+```
+
+마지막으로 사용자의 최고의 수면 시간을 계산할 버튼을 navigationBar에 추가하자. button의 call을 위한 method calculateBedTime()를 추가하자
+```swift
+func calculateBedTime() {
+}
+````
+
+trailing button을 위해 navigationBarItem() modifier를 추가하자. 만약 여러개의 버튼을 추가하길 원한다면 HStack을 사용할 수도 있다. 아래의 modifier를 VStack에 추가하자.
+```swift
+.navigationBarTitile("BetterRest")
+.navigationBarItems(trailing: 
+  Button(action: calculateBedTime) {
+    Text("Calculate")
+  }
+)
+```
+
+
+### SwiftUI CoreML 연결
+SwiftUI
+
+
