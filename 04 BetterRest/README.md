@@ -243,7 +243,81 @@ trailing button을 위해 navigationBarItem() modifier를 추가하자. 만약 �
 ```
 
 
-### SwiftUI CoreML 연결
-SwiftUI
+### SwiftUI Core ML 연결
+훈련된 모델을 가지고 예측을 값들을 전송하고 리턴값을 읽는 코드 두 줄로 만들 수 있다. 우리의 경우 이미 Core ML 모델을 Create ML로 만들었다. 프로젝트 파일에 추가하자.
 
+.mlmodel 파일을 Xcode에 추가하면 자동으로 같은 이름의 Swift class가 생성된다. 빌드 과정에서 자동으로 생성되므로 class를 볼 수는 없다. 파일을 "SleepCalculator.mlmodel"로 변경하자.
 
+이제 calculateBedTime() 메소드를 작성하자. 처음에 SleepCalculator의 인스턴스를 생성한다.
+```swift
+let model = SleepCalculator()
+```
+
+이것은 우리의 모든 읽어서 예측을 output으로 줄 것이다. 우리는 CSV파일을 아래와 같은 필드를 포함해 훈련했다.
+- "wake": 사용자가 일어나길 원하는 시간. 이것은 초단위로 표현된다. 그래서 8am은 8시간 * 60 * 60 28800초로 표현된다.
+- "estimatedSleep": 사용자가 대략적으로 원하는 수면 시간이다. 4와 12 사이의 0.25단위로 저장한다.
+- "coffee": 사용자가 대략적으로 하루에 몇잔의 커피를 마시는지 나타낸다.
+
+예측을 얻기 위해 우리는 이 필드들을 채워야한다. 우린 이미 sleepAmount와 coffeeAmount 프로퍼티들을 가지고 있으므로 두개는 해결되었다. 
+
+그러나 일어나는 시간 wakeUp 프로퍼티는 초를 표현하기 위한 Double이 아니라 Date이다. Swift의 DateComponents를 사용하자. 아래의 코드를 calculateBedTime()에 작성하자.
+```swift
+let components = Calendar.current.dateComponents([.hour, .minute], from: wakeUp)
+let hour = (components.hour ?? 0) * 60 * 60
+let minute = (components.minute ?? 0) * 60
+```
+
+다음은 우리의 값들을 Core ML에 제공할 차례다. 이는 아마 Core ML이 어떤 종류의 문제를 맞닥뜨리면 실패할 것이므로 do/catch 가 필요하다. 예측을 위해 모델의 prediction() 메소드를 사용하는데 wake time, estimated sleep, and coffee amount이 필요하다. 아래의 코드를 calculateBedTime()에 추가하자.
+```swift
+do {
+  let prediction = try model.prediction(
+    wake: Double(hour + minute), 
+    estimatedSleep: sleepAmount, 
+    coffee: Double(coffeeAmount))
+  // more code here
+} catch {
+  // something went wrong!
+}
+```
+
+이제 prediction은 사용자가 얼마나 자야하는지가 포함되어있다. 이는 훈련 데이터의 일부가 아니라 Core ML 알고리즘을 통해 동적으로 계산된 결과이다. 이는 초단위의 결과 값이므로 사용자가 잠들 시간을 알 수 있도록 변환해야한다. 이는 그들이 일어나길 원하는 시간에서 결과 값을 빼야한다. 감사하게도 초단위의 값을 Date타입에서 직접적으로 뺄셈을 할 수 있다. 아래의 코드를 추가하자
+```swift
+let sleepTime = wakeUp - prediction.actualSleep
+```
+
+이제 잠들어야 할 시간을 알고 있으므로 사용자에게 보여주는 일이 마지막으로 남았다. 이를 alert로 작업할 것이다. 아래의 프로퍼티들을 추가하자.
+```swift
+@State private var alertTitle = ""
+@State private var alertMessage = ""
+@State private var showingAlert = false
+```
+
+prediction이 예외를 던지면 error 메시지를 작성하자. // something went wrong! 를 아래의 코드로 대체하자.
+```swift
+alertTitle = "Error"
+alertMessage = "Sorry, there was a problem calculating your bedtime."
+```
+
+에러가 발생하든 아니든 우린 alert를 보여줘야 한다. 그러므로 catch블록 다음에 아래의 코드를 작성하자
+```swift
+showingAlert = true
+```
+
+prediction의 결과 사용자가 잠들 시간의 값은 Date이므로 이를 더 보기좋게 하기 위해 DateFormatter를 사용한다. calculateBedTime() 메소드의 sleepAmount 변수 다음에 아래의 코드를 작성하자.
+```swift
+let formatter = DateFormatter()
+formatter.timeStyle = .short
+
+alertMessage = formatter.string(from: sleepTime)
+alertTitle = "Your ideal bedtime is..."
+```
+
+이 단계를 마무리하기 위해 alert() modifier를 VStack에 추가하자.
+```swift
+.alert(isPresented: $showingAlert) {
+  Alert(
+    title: Text(alertTitle), 
+    message: Text(alertMessage), 
+    dismissButton: .default(Text("OK")))
+}
+```
