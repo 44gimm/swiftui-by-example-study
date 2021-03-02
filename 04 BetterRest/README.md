@@ -321,3 +321,51 @@ alertTitle = "Your ideal bedtime is..."
     dismissButton: .default(Text("OK")))
 }
 ```
+
+
+### UI 정리
+첫번째로 새로운 Date의 인스턴스를 생성하면 이는 자동으로 현재날짜와 시간을 설정한다. 그래서 wakeUp 프로퍼티를 생성하면 기본 값으로 현재 시간이 설정되어있다. 기본적으로 기상시간을 아침 6~8시 정도로 설정하는게 많은 사용자들에게 유용할 것이다. ContentView에 아래의 코드를 추가하자.
+```swift
+static var defaultWakeTime: Date {
+  var components = DateComponents()
+  components.hour = 7
+  components.minute = 0
+  return Calendar.current.date(from: components) ?? Date()
+}
+```
+
+그러면 wakeUp 프로퍼티를 아래와 같이 수정하여 기본 값을 설정할 수 있다.
+```swift
+@State private var wakeUp = defaultWakeTime
+```
+
+다음 NavigationView 안의 VStack을 Form으로 변경하자.
+```swift
+NavigationView {
+  Form {
+
+```
+
+VStack에서 Form으로 변경하면서 wheel picker를 유지하기 위해 .datePickerStyle(WheelDatePickerStyle()) modifier를 사용하자.
+```swift
+DatePicker(
+  "Please enter a time", 
+  selection: $wakeUp, 
+  displayedComponents: .hourAndMinute)
+  .labelsHidden()
+  .datePickerStyle(WheelDatePickerStyle())
+```
+
+Tip: wheel picker는 iOS와 watchOS에서만 사용 가능하다. SwiftUI로 macOS와 tvOS를 작성할 계획이라면 이는 피해야한다.
+
+Form 안의 오든 view들은 목록의 row로 처리되고 있다. 이를 해결하기 위해 Text와 Stepper를 한 쌍으로 VStack을 감싸고 .leading으로 정렬하자.
+```swift
+VStack(alignment: .leading, spacing: 0) {
+    Text("Desired amount of sleep")
+        .font(.headline)
+
+    Stepper(value: $sleepAmount, in: 4...12, step: 0.25) {
+        Text("\(sleepAmount, specifier: "%g") hours")
+    }
+}
+```
