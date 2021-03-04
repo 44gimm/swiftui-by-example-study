@@ -111,3 +111,74 @@ List {
 
 
 ### 앱 번들로부터 리소스 불러오기
+Image view들을 사용할 때 SwiftUI는 자동으로 앱의 asset catalog를 봐야하는걸 알지만, 텍스트파일과 같은 다른 데이터는 우리가 더 작업해야한다.
+
+Xcode가 iOS앱을 빌드할 때 "bundle"이라는 것을 생성한다. 이는 애플의 모든 플랫폼에서 발생하고, 이는 시스템이 모든 파일을 하나의 장소에 저장하게 한다. 미래에는 당신이 하나의 앱에 어떻게 다수의 번들을 포함할 수 있는지 알게 될 것이고, siri extention, iMessage apps, watchOS 등 많은 것들을 main bundle이라 부르는 하나의 iOS앱 번들에 쓸 수 있다는 것을 알게 될 것이다.
+
+URL이라는 새로운 타입을 사용하는데, 이것은 단순히 웹 주소들을 저장하는 것을 넘어 파일의 위치를 저장할 수 있어서 유용하다. 이를 메인 앱 번들의 URL을 읽기 원한다면
+```swift
+if let fileURL = Bundle.main.url(forResource: "some-file", withExtension: "txt") {
+  // we found the file in our bundle!
+}
+```
+
+URL을 가지고 있으면 stirng으로 불러올 수 있다.
+```swift
+if let fileContents = try? String(contentsOf: fileURL) {
+  // we loaded the file into a string!
+})
+```
+
+
+### 문자열 작업하기
+iOS는 문자열을 다루기 위한 몇가지 강력한 API들을 제공한다. 이 앱에서 우리는 app bundle로 부터 만개가 넘는 여덟 자리 단어를 포함하는 파일을 불러와 사용할 것이다. 단어 하나당 한줄에 저장되어 있고, 단어들을 나누어 무작위로 하나를 가져올 수 있도록 배열로 만들고 싶다.
+
+Swift는 이를 위해 components(separatedBy:) 메소드를 제공한다.
+```swift
+let input = """
+            a
+            b
+            c
+            """
+let letters = input.components(separatedBy: "\n")
+```
+
+결과는 문자열 배열이고 하나의 요소를 무작위로 뽑기위해 ramdomElement()를 사용한다.
+```swift
+let letter = letters.randomElement()
+```
+
+또 다른 유용한 메소느는 trimmingCharacters(in:)이 있는데, 특정 characters를 문자열에서 삭제할 수 있게 한다.
+```swift
+let trimmed = letter?.trimmingChracters(in: .whitespacesAndNewlines)
+```
+
+이 기능은 UITextChecker 클래스를 통해 제공된다. UI가 붙는 이유는 두가지가 있다.
+1. 이 클래스는 UIKit에 있다. 그러나 UIKit의 모든 인터페이스를 불러와야 하는 것은 아니고 SwiftUI가 자동으로 가져온다.
+2. 이 클래스는 Objective-C 언어로 작성되었다. 
+
+철자가 틀린 단어가 있는지 확인하기위해 총 네가지 단계가 있다. 첫번째로 검사할 단어와 UITextChecker 인스턴스를 생성한다.
+```swift
+let word = "swift"
+let checker = UITextChecker()
+```
+
+두번째 chekcer에게 검사해야 할 단어의 양을 정해야한다. utf16을 사용하는 이유는 swift와 Objective-c가 문자열을 저장하는 방식을 같게 하기 위함이다.
+```swift
+let range = NSRange(location: 0, lenght: word.utf16.count)
+```
+
+세번째 단어에서 철자가 잘못된 부분이 있는지 결과를 받로록 checker에 요청한다. 그러면 잘못된 부분의 위치를 Objective-c 문자열 범위를 리턴하고, 없을 경우 Objective-c는 옵셔널 개념이 없으므로 다른 방법인 NSNotFound를 리턴한다.
+```swift
+let misspelledRange = checker.rangeOfMisspelledWord(
+  in: word, 
+  range: range, 
+  startingAt: 0, 
+  wrap: false, 
+  language: "en")
+```
+
+그래서 우린 철자가 잘못된 부분이 있는지를 NSNotFound를 확인하면 된다.
+```swift
+let allGood = misspelledRange.location == NSNotFound
+```
