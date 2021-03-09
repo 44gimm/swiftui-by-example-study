@@ -182,3 +182,74 @@ let misspelledRange = checker.rangeOfMisspelledWord(
 ```swift
 let allGood = misspelledRange.location == NSNotFound
 ```
+
+
+## Implementation
+
+
+### 단어 리스트 추가
+이 앱의 UI는 세가지 주요 view로 구성되는데, 단어 스펠링을 보여 줄 NavigationView, 사용자가 정답을 입력할 수 있는 TextField, 입력한 모든 단어를 보여 줄 List 이다.
+
+사용자들이 TextField에 단어를 입력하면 우린 자동으로 List에 추가하고, 단어를 이전에 사용한 적이 있는지, 주어진 어근으로 부터 실제로 생성할 수 있는지, 실제로 있는 단어인지 확인하기 위해 몇가지 validation을 추가할 것이다. 
+
+ContentView에 세가지 프로퍼티와 body view를 추가하자.
+```swift
+@State private var usedWords = [String]()
+@State private var rootWord = ""
+@State private var newWord = ""
+
+var body: some View {
+  NavigationView {
+    VStack {
+      TextField("Enter your word", text: $newWord)
+
+      List(usedWords, id: \.self) {
+        Text($0)
+      }
+    }
+    .navigationBarTitle(rootWord)
+  }
+}
+```
+
+프로그램을 실행하면 TextField가 보기에 좋지 않으므로 두가지 modifier를 추가한다. SwiftUI에서 textFieldStyle() modifier를 사용하여 둥근 회색 경계선을 그릴 수 있다. TexField가 자동으로 첫 문자를 대문자로 변환하는 작업을 막기 위해 .autocapitalization() modifier도 사용할 수 있다.
+```swift
+.textFieldStyle(RoundedBorderTextFieldStyle())
+.autocapitalization(.none)
+.padding()
+```
+
+TextField에 입력한 단어를 submit 하기 위해 addNewWord() 메소드를 작성하자.
+```swift
+func addNewWord() {
+  // lowercase and trim the word, to make sure we don't add duplicate words with case differences
+  let answer = newWord.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+
+  // exit if the remaining string is empty
+  guard answer.count > 0 else {
+    return
+  }
+
+  // extra validation to come
+
+  usedWords.insert(answer, at: 0)
+  newWord = ""
+}
+```
+
+우린 사용자가 키보드의 return 키를 누를면 addNewWord() 메소드를 호출한다. 이를 위해 TextField를 수정할 수 있다. 이제 단어를 입력 후 키보드의 return 키를 누르면 리스트에 나타날 것이다.
+```swift
+TextField("Enter your word", text: $newWord, onCommit: addNewWord)
+```
+
+List에 단어의 카운트를 붙이기 위해 수정한다. List의 row는 암묵적으로 horizontal stack이 자동으로 적용된다.
+```swift
+List(usedWords, id: \.self) {
+  Image(systemName: "\($0.count).circle")
+  Text($0)
+}
+```
+
+
+### 앱 실행 시 코드 실행
+Xcode가 iOS 프로젝트를 빌드할 때 컴파일된 파일, 모든 asset들은 bundle이라 불리는 하나의 디렉토리에 넣은 다음 bundle에 YourAppName.app 이라는 이름을 붙인다. 이 ".app"이라는 확장자는 자동으로 iOS와 Apple의 다른 플랫폼이 bundle 안에서 프로그램을 실행 시켜야 한다는 사실을 알게한다.
