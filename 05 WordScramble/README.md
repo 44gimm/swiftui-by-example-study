@@ -252,4 +252,42 @@ List(usedWords, id: \.self) {
 
 
 ### 앱 실행 시 코드 실행
-Xcode가 iOS 프로젝트를 빌드할 때 컴파일된 파일, 모든 asset들은 bundle이라 불리는 하나의 디렉토리에 넣은 다음 bundle에 YourAppName.app 이라는 이름을 붙인다. 이 ".app"이라는 확장자는 자동으로 iOS와 Apple의 다른 플랫폼이 bundle 안에서 프로그램을 실행 시켜야 한다는 사실을 알게한다.
+Xcode가 iOS 프로젝트를 빌드할 때 컴파일된 파일, 모든 asset들은 bundle이라 불리는 하나의 디렉토리에 넣은 다음 bundle에 YourAppName.app 이라는 이름을 붙인다. 이 ".app"이라는 확장자는 자동으로 iOS와 Apple의 다른 플랫폼이 bundle 안에서 프로그램을 실행 시켜야 한다는 사실을 알게한다. 
+
+우린 만개가 넘는 8자리 단어들을 가지고 있는 "start.txt"파일을 포함하여 사용자를 위해 단어를 무작위로 선택할 것이다. startGame() 메소드가 호출되면 rootWord 프로퍼티에 사용자에게 보여줄 단어를 포함시킨다. startGame() 메소드는
+1. start.txt 파일을 우리의 bundle에서 찾고
+2. string으로 불러와서
+3. 각 단어들을 string 타입의 배열로 쪼갠다.
+4. 그 중 하나를 무작위로 선택하여 rootWord에 할당하고, 또는 배열이 비어있으면 기본 값을 사용한다.
+
+```swift
+func startGame() {
+  // 1
+  if let startWordsURL = Bundle.main.url(forResource: "start", withExtension: "txt") {
+    // 2
+    if let startWords = try? String(contentsOf: startWordsURL) {
+      // 3
+      let allWords = startWords.components(separatedBy: "\n")
+
+      // 4
+      rootWord = allWords.randomElement ?? "silkworm"
+
+      // If we are here everything has worked, so we can exit
+      return
+    }
+  }
+
+  // If were are *here* then there was a problem – trigger a crash and report the error
+  fatalError("Could not load start.txt from bundle.")
+}
+```
+
+이제 게임을 위해 메소드를 호출해야 한다. view가 나타나면 호출하기 위해 modifier를 navigationBarTitle() 다음에 추가하자.
+```swift
+.onAppear(perform: startGame)
+```
+
+
+### UITextChecker로 단어들 유효성검사
+이제 마지막 단계로 사용자가 유요하지 않은 단어를 입력할 수 없도록 하는 것이다. 네 가지 메소드를 구현할 것이고 각각 정확히 하나씩 체크하게 구현한다.
+
