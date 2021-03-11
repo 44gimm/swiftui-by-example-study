@@ -290,4 +290,93 @@ func startGame() {
 
 ### UITextChecker로 단어들 유효성검사
 이제 마지막 단계로 사용자가 유요하지 않은 단어를 입력할 수 없도록 하는 것이다. 네 가지 메소드를 구현할 것이고 각각 정확히 하나씩 체크하게 구현한다.
+- 이미 사용되지 않은 단어인지
+- 가능한 단어인지("silkworm"으로 부터 "car"를 입력할 수 없다.)
+- 실제 단어인지(영어 단어)
+- 네번째는 에러메시지를 더 쉽게 보여줄 수 있도록 구성
 
+첫번째 
+```swift 
+func isOriginal(word: String) -> Bool {
+  !usedWords.contains(word)
+}
+```
+
+두번째
+```swift
+func isPossible(word: String) -> Bool {
+  var tempWord = rootWord
+
+  for letter in word {
+    if let pos = tempWord.firstIndex(of: letter) {
+      tempWord.remove(at: pos)
+    } else {
+      return false
+    }
+  }
+
+  return  true
+}
+```
+
+세번째는 UITextChecker를 사용한다. Swift의 String을 Objective-C에서 안전하게 사용하기 위해 NSRange 사용 시 UTF-16 카운트틀 사용한다.
+```swift
+func isReal(word: String) -> Bool {
+  let checker = UITextChekcer()
+  let range = NSRange(location: 0, length: word.utf16.count)
+  let misspelledRange = checker.rangeOfMisspelledWord(
+    in: word, 
+    range: range, 
+    startingAt: 0, 
+    wrap: false, 
+    language: "en")
+  
+  return misspelledRange.location == NSNotFound
+}
+```
+
+에러 alert를 보여주기 위해 프로퍼티들을 추가한다.
+```swift
+@State private var errorTitle = ""
+@State private var errorMessage = ""
+@State private var showingError = false
+```
+
+메소드를 추가하여 에러 관련 프로퍼티를 설정한다.
+```swift
+func wordError(title: String, message: String) {
+  errorTitle = title
+  errorMessage = message
+  showingError = true
+}
+```
+
+.onAppear()의 아래에 alert() modifier를 통해 SwiftUI에게 바로 전달한다.
+```swift
+.alert(isPresented: $showingError) {
+  Alert(
+    title: Text(errorTitle), 
+    message: Text(errorMesage), 
+    dismissButton: .default(Text("OK")))
+}
+```
+
+마지막으로 addNewWord() 메소드의 **// extra validation to come** 부분을 수정한다.
+```swift
+guard isOriginal(word: answer) else {
+  wordError(title: "Word used already", message: "Be more original")
+  return
+}
+
+guard isPossible(word: answer) else {
+  wordError(title: "Word not recognized", message: "You can't just make them up, you know!")
+  return
+}
+
+guard isReal(word: answer) else {
+  wordError(title: "Word not possible", message: "That isn't a real word.")
+  return
+}
+```
+
+앱을 실행하여 중복 단어를 입력, 가능하지 않은 단어, 의미없는 단어를 입력하며 테스트해보자.
