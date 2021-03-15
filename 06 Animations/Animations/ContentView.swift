@@ -25,7 +25,7 @@ extension AnyTransition {
 }
 
 struct ContentView: View {
-  @State private var animationAmount: CGFloat = 0.0
+  @State private var animationAmount: CGFloat = 1
   @State private var enabled = false
   @State private var dragAmount = CGSize.zero
   @State private var isShowingRed = false
@@ -33,125 +33,18 @@ struct ContentView: View {
   let letters = Array("Hello SwiftUI")
   
   var body: some View {
-//    Button("Tap Me") {
-//      self.animationAmount += 1
-//    }
-//    .padding(50)
-//    .background(Color.red)
-//    .foregroundColor(.white)
-//    .clipShape(Circle())
-//    .overlay(
-//      Circle()
-//        .stroke(Color.red)
-//        .scaleEffect(animationAmount)
-//        .opacity(Double(2 - animationAmount))
-//        .animation(
-//          Animation.easeInOut(duration: 1)
-//            .repeatForever(autoreverses: true)
-//      )
-//    )
-//    .onAppear {
-//      self.animationAmount = 2
-//    }
-    
-//    print(animationAmount)
-//    return VStack {
-//      Stepper(
-//        "Scale amount",
-//        value: $animationAmount.animation(
-//          Animation.easeInOut(duration: 1)
-//            .repeatCount(3, autoreverses: true)
-//        ),
-//        in: 1...10
-//      )
-//
-//      Spacer()
-//
-//      Button("Tap Me") {
-//        self.animationAmount += 1
-//      }
-//      .padding(40)
-//      .background(Color.red)
-//      .foregroundColor(.white)
-//      .clipShape(Circle())
-//      .scaleEffect(animationAmount)
-//    }
-    
-//    Button("Tap Me") {
-//      withAnimation(.interpolatingSpring(stiffness: 5, damping: 1)) {
-//        self.animationAmount += 360
-//      }
-//    }
-//    .padding(50)
-//    .background(Color.red)
-//    .foregroundColor(.white)
-//    .clipShape(Circle())
-//    .rotation3DEffect(.degrees(Double(animationAmount)), axis: (x: 0, y: 1, z: 0))
-    
-//    Button("Tap Me") {
-//      self.enabled.toggle()
-//    }
-//    .frame(width: 200, height: 200)
-//    .background(enabled ? Color.blue : Color.red)
-//    .animation(.default)
-//    .foregroundColor(.white)
-//    .clipShape(RoundedRectangle(cornerRadius: enabled ? 60 : 0))
-//    .animation(.interpolatingSpring(stiffness: 10, damping: 1))
-    
-//    LinearGradient(
-//      gradient: Gradient(colors: [.yellow, .red]),
-//      startPoint: .topLeading,
-//      endPoint: .bottomTrailing
-//    )
-//      .frame(width: 300, height: 200)
-//      .clipShape(RoundedRectangle(cornerRadius: 10))
-//      .offset(dragAmount)
-//      .gesture(
-//        DragGesture()
-//          .onChanged { self.dragAmount = $0.translation }
-//          .onEnded { _ in
-//            withAnimation(.spring()) {
-//              self.dragAmount = .zero
-//            }
-//          }
-//      )
-    
-//    HStack(spacing: 0) {
-//      ForEach(0..<letters.count) { num in
-//        Text(String(self.letters[num]))
-//          .padding(5)
-//          .font(.title)
-//          .background(self.enabled ? Color.blue : Color.red)
-//          .offset(self.dragAmount)
-//          .animation(Animation.default.delay(Double(num) / 20))
-//      }
-//    }
-//    .gesture(
-//      DragGesture()
-//        .onChanged { self.dragAmount = $0.translation }
-//        .onEnded { (_) in
-//          self.dragAmount = .zero
-//          self.enabled.toggle()
-//        }
-//    )
-    
-    VStack {
-      Button("Tap Me") {
-        withAnimation {
-          self.isShowingRed.toggle()
-        }
-      }
-      
-      if isShowingRed {
-        Rectangle()
-          .fill(Color.red)
-          .frame(width: 200, height: 200)
-//          .transition(.asymmetric(insertion: .scale, removal: .opacity))
-          .transition(.pivot)
-      }
+    Button("Tap Me") {
+      self.animationAmount += 1
     }
-    
-    
+    .padding(50)
+    .background(Color.red)
+    .foregroundColor(.white)
+    .clipShape(Circle())
+    .scaleEffect(animationAmount)
+    .animation(
+      Animation.easeInOut(duration: 1)
+        .repeatCount(3, autoreverses: true)
+    )
   }
 }
 
