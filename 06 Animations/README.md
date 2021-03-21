@@ -161,3 +161,46 @@ Button("Tap Me") {
 
 ### 애니메이션 바인딩
 animation() modifier는 모든 SwiftUI 바인딩에 적용될 수 있으며, 이는 현재의 값과 새로운 값의 사이에서 애니메이션이 되도록 한다. 
+
+```swift
+struct ContentView: View {
+  @State private var animationAmount: CGFloat = 1
+
+  var body: some View {
+    print(animationAmount)
+
+    return VStack {
+      Stepper(
+        "Scale amount", 
+        value: $animationAmount.animation(), 
+        in: 1...10)
+
+      Spacer()
+
+      Button("Tap Me") {
+        self.animationAmount += 1
+      }
+      .padding(40)
+      .background(Color.red)
+      .foregroundColor(.white)
+      .clipShape(Circle())
+      .scaleEffect(animationAmount)
+    }
+  }
+}
+```
+
+stepper로 animationAmount를 증가와 감소시키고, button은 1씩 증가시키는데, 둘 다 버튼의 사이즈를 변경하는 같은 데이터로 결합되어 있다. 그러나 button을 탭하면 사이즈가 즉시 변경되고, stepper는 $animationAmount.animation() 으로 바인딩되어 SwiftUI가 자동으로 변화를 애니메이션으로 그린다.
+
+animationAmount가 2.0, 3.0, 4.0과 같이 프린트 되는 것을 볼 수 있다. 동시에 버튼이 사이즈가 커지고 작아지고 하는데, 이는 2, 3, 4로 바로 이동하는 것이 아니다. 실제로 SwiftUI는 바인딩 변화 전 상태에서 바인딩 변화 후의 상태를 측정하여 애니매이션을 적용하여 A에서 B로 이동하는 것이다. 이는 우리가 Boolena 값의 변화를 애니메이션으로 그릴 수 있는 이유이다. 
+
+이 애니메이션 바인딩은 우리가 view에서 사용하는 animation() modifier와 같은 것을 사용한다.
+```swift
+Stepper(
+  "Scale amount", 
+  value: $animationAmount.animation(
+    Animation.easeInOut(duration: 1)
+      .repeatCount(3, autoreverses: true)
+  ), 
+  in: 1...10)
+```
