@@ -111,4 +111,53 @@ struct ContentView: View {
 )
 ```
 
+지속적인 애니메이션을 위해서 repeatForever() modifier를 사요할 수도 있다.
+```swift
+.animation(
+  Animation.easeInOut(duration: 1)
+    .repeatForever(autoreverses: true)
+)
+```
 
+애니메이션을 view의 생명주기동안 즉시 시작하여 지속 되도록 만들기위해 repeatForever()를 onAppear와 조합해서 사용할 수 있다. 이를 위해 버튼의 애니메이션을 삭제하고 overlay() modifer를 추가한다.
+```swift
+.overlay(
+  Circle()
+    .stroke(Color.red)
+    .scaleEffect(animationAmount)
+    .opacity(Double(2 - animationAmount))
+    .animation(
+      Animation.easeOut(duration: 1)
+        .repeatForever(autoreverses: false)
+    )
+)
+```
+
+이는 버튼 위에 빨간 원을 그리고, opacity를 1~0으로 조절한다. 버턴의 scaleEffect() modifier와 탭했을 때의 코드 animationAmount += 1을 삭제한다. 그리고 onAppear() modifier를 버튼에 추가하고 animationAmount 를 2로 설정한다. repeatForever의 autoreverses가 false 이므로 원이 커지면서 사라지는 모습이 지속적으로 반복된다.
+
+```swift
+Button("Tap Me") {
+  // self.animationAmount += 1
+}
+.padding(40)
+.background(Color.red)
+.foregroundColor(.white)
+.clipShape(Circle())
+.overlay(
+  Circle()
+    .stroke(Color.red)
+    .scaleEffect(animationAmount)
+    .opacity(Double(2 - animationAmount))
+    .animation(
+      Animation.easeOut(duration: 1)
+        .repeatForever(autoreverses: false)
+      )
+)
+.onAppear {
+  self.animationAmount = 2
+}
+```
+
+
+### 애니메이션 바인딩
+animation() modifier는 모든 SwiftUI 바인딩에 적용될 수 있으며, 이는 현재의 값과 새로운 값의 사이에서 애니메이션이 되도록 한다. 
