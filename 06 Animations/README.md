@@ -192,7 +192,7 @@ struct ContentView: View {
 
 stepper로 animationAmount를 증가와 감소시키고, button은 1씩 증가시키는데, 둘 다 버튼의 사이즈를 변경하는 같은 데이터로 결합되어 있다. 그러나 button을 탭하면 사이즈가 즉시 변경되고, stepper는 $animationAmount.animation() 으로 바인딩되어 SwiftUI가 자동으로 변화를 애니메이션으로 그린다.
 
-animationAmount가 2.0, 3.0, 4.0과 같이 프린트 되는 것을 볼 수 있다. 동시에 버튼이 사이즈가 커지고 작아지고 하는데, 이는 2, 3, 4로 바로 이동하는 것이 아니다. 실제로 SwiftUI는 바인딩 변화 전 상태에서 바인딩 변화 후의 상태를 측정하여 애니매이션을 적용하여 A에서 B로 이동하는 것이다. 이는 우리가 Boolena 값의 변화를 애니메이션으로 그릴 수 있는 이유이다. 
+animationAmount가 2.0, 3.0, 4.0과 같이 프린트 되는 것을 볼 수 있다. 동시에 버튼이 사이즈가 커지고 작아지고 하는데, 이는 2, 3, 4로 바로 이동하는 것이 아니다. 실제로 SwiftUI는 바인딩 변화 전 상태에서 바인딩 변화 후의 상태를 측정하여 애니매이션을 적용하여 A에서 B로 이동하는 것이다. 이는 우리가 Boolean 값의 변화를 애니메이션으로 그릴 수 있는 이유이다. 
 
 이 애니메이션 바인딩은 우리가 view에서 사용하는 animation() modifier와 같은 것을 사용한다.
 ```swift
@@ -203,4 +203,50 @@ Stepper(
       .repeatCount(3, autoreverses: true)
   ), 
   in: 1...10)
+```
+
+
+### 명시적 애니메이션 생성
+animation() modifier를 작성하여 어떻게 암시적 애니메이션을 생성하는지, 바인딩하는지 알아보았다. 명시적 애니메이션은 state의 변화의 결과로 발생하는 애니메이션을 SwiftUI에게 요청한다. 바인딩이 되지 않고, 뷰에 연결되지 않고, 단지 state의 변경으로 인하여 애니메이션이 발생하기를 명시적으로 요청한다.
+```swift
+struct ContentView: View {
+  var body: some View {
+    Button("Tap Me") {
+      // do nothing
+    }
+    .padding(50)
+    .background(Color.red)
+    .foregroundColor(.white)
+    .clipShape(Circle())
+  }
+}
+```
+
+버튼이 탭 됐을 때 3D 효과를 rotation3DEffect() modifier를 이용하여 만들 것이다.
+- X축(수평)을 통해 뷰를 기울이면 앞뒤로 회전 할 수 있다.
+- Y축(수직)을 통해 뷰를 기울이면 왼쪽과 오른쪽으로 회전 할 수 있다.
+- Z축(깊이)을 통해 뷰를 기울이면 왼쪽과 오른쪽으로 회전 할 수 있다.
+
+이 작업을 위해 state를 추가한다.
+```swift
+@State private var animationAmount = 0.0
+```
+
+Y축을 통해 animationAmount 각도로 회전하기 위해 Button에 modifier를 추가한다.
+```swift
+.rotation3DEffect(.degrees(animationAmount), axis: (x: 0, y: 1, z: 0))
+```
+
+이제 중요 부분으로 버튼이 탭 될때마다 360 만큼을 animationAmount에 추가하기 위해 버튼 액션에 코드를 추가한다. 단지 `self.animationAmount += 360` 을 추가하면 animation modifier가 없으므로 즉시 변화가 일어날 것이다. 만약 withAnimation() 클로저를 사용한다면 SwiftUI는 새로운 state로 인한 모든 변경사항이 애니메이션 되도록 보장할 것이다. 버튼 액션에 코드를 추가하자.
+```swift
+withAnimation {
+  self.animationAmount += 360
+}
+```
+
+withAnimation() 에는 SwiftUI에서 사용할 수 있는 애니매이션들을 모두 동일하게 파라미터를 전달할 수 있다. 
+```swift
+withAnimation(.interpolatingSpring(stiffness: 5, damping: 1)) {
+  self.animationAmount += 360
+}
 ```
